@@ -245,7 +245,313 @@ Below that, call the following function
 
 View it in web browser and see the console.log
 
+now we have to fill userData with the response which we got from getUserData
+
+so we will write as:
+so on success add following:
+this.setState({userData: data});
+
+and on failure add following:
+this.setState({username: null});
+
+Add profile to render function of App as:
+render() {
+    return(
+      <div>
+        <Profile />
+      </div>
+    );
+  }
+  
+Open Profile.jsx
+
+Add following code in it:
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+
+class Profile extends Component {
+  render() {
+    return(
+      <div>
+        This is profile
+      </div>
+    );
+  }
+}
+
+export default Profile
+
+Now import Profile.jsx in App.jsx as 
+
+import Profile from './github/Profile.jsx';
+
+Now pass userData to Profile module as:
+
+<Profile userData={this.state.userData} />
+
+Open Profile.jsx file
+and change the text "This is profile" to
+
+{this.props.userData.name}
+
+Run the app and check
+
+Open Profile.jsx
+Replace dynamic name {this.props.userData.name} with
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">{this.props.userData.name}</h3>
+        </div>
+        <div class="panel-body">
+          Panel content
+        </div>
+      </div>
+
+Edit the above text to add variables
+
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">{this.props.userData.name}</h3>
+        </div>
+        <div className="panel-body">
+          <div className="row">
+            <div className="col-md-4">
+              <img src={this.props.userData.avatar_url} className="thumbnail" style={{width:"100%"}} />
+            </div>
+            <div className="col-md-8">
+              <div className="row">
+                <div className="col-md-12">
+                  <span className="label label-primary">{this.props.userData.public_repos} Repos</span>
+                  <span className="label label-success">{this.props.userData.public_gists} Public Gists</span>
+                  <span className="label label-info">{this.props.userData.followers} Followers</span>
+                  <span className="label label-danger">{this.props.userData.following} Following</span>
+                </div>
+                <hr />
+                <div className="row">
+                  <div className="col-md-12">
+                    <ul className="list-group">
+                      <li className="list-group-item"><strong>Username: </strong> {this.props.userData.login}</li>
+                      <li className="list-group-item"><strong>Location: </strong> {this.props.userData.location}</li>
+                      <li className="list-group-item"><strong>Email Address: </strong> {this.props.userData.email}</li>
+                    </ul>
+                  </div>
+                </div>
+                <br />
+                <a className="btn btn-primary" target="_blank" href={this.props.userData.html_url}>Visit Profile</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+Create new function below getUserData in App.js to fetch repolist
+
+  
+  //Get user repos from github
+  getUserRepos() {
+    $.ajax({
+      url: 'https://api.github.com/users/' + this.state.username+'/repos?per_page='+this.state.perPage+'&client_id=' + this.props.clientId+'&client_secret=' + this.props.clientSecret + '&sort=created',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({userRepos: data});
+        console.log(data);
+      }.bind(this),
+      error: function(xhr, status, error) {
+        this.setState({username: null});
+        //this.setState({userRepos: null});
+        console.log(err);
+        alert(err);
+      }.bind(this)
+    });
+  }
+  
+Call this in componentDidMount function
+  componentDidMount() {
+    this.getUserData();
+    this.getUserRepos();
+  }
+  
+In App.jsx change <Profile userData={this.state.userData} /> to <Profile userData={this.state.userData} /><Profile {...this.state} />
+
+{...this.state} will pass all the state data
+
+Open RepoList.jsx and paste following code
+
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+import Repo from './Repo.jsx';
+
+class RepoList extends Component {
+  render() {
+    return(
+      <div>
+        <ul className="list-group">
+          {
+            this.props.userRepos.map(repo => {
+              return <Repo
+                     repo={repo}
+                     key={repo.id}
+                     {...this.props}
+                      />
+            })
+          }
+        </ul>
+      </div>
+    );
+  }
+}
+
+export default RepoList
+
+Import the Repolist in Profile
+import RepoList from './RepoList.jsx';
+
+Copy and paste following code in Repo.jsx
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+
+class Repo extends Component {
+  render() {
+    const {repo} = this.props;
+    
+    return(
+      <li className="list-group-item">
+        <a href={repo.html_url}>{repo.name}</a> : {repo.description}
+      </li>
+    );
+  }
+}
+
+export default Repo
+
+Add the repolist in Profile.jsx, change following code in profile.jsx
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h3 className="panel-title">{this.props.userData.name}</h3>
+        </div>
+        <div className="panel-body">
+          <div className="row">
+            <div className="col-md-4">
+              <img src={this.props.userData.avatar_url} className="thumbnail" style={{width:"100%"}} />
+            </div>
+            <div className="col-md-8">
+              <div className="row">
+                <div className="col-md-12">
+                  <span className="label label-primary">{this.props.userData.public_repos} Repos</span>
+                  <span className="label label-success">{this.props.userData.public_gists} Public Gists</span>
+                  <span className="label label-info">{this.props.userData.followers} Followers</span>
+                  <span className="label label-danger">{this.props.userData.following} Following</span>
+                </div>
+                <hr />
+                <div className="row">
+                  <div className="col-md-12">
+                    <ul className="list-group">
+                      <li className="list-group-item"><strong>Username: </strong> {this.props.userData.login}</li>
+                      <li className="list-group-item"><strong>Location: </strong> {this.props.userData.location}</li>
+                      <li className="list-group-item"><strong>Email Address: </strong> {this.props.userData.email}</li>
+                    </ul>
+                  </div>
+                </div>
+                <br />
+                <a className="btn btn-primary" target="_blank" href={this.props.userData.html_url}>Visit Profile</a>
+              </div>
+            </div>
+            
+          </div>
+          
+          <hr />
+          <h3>User Repositories</h3>
+          <RepoList userRepos={this.props.userRepos} />
+          
+        </div>
+      </div>
+  
+Run the app
+
+Open the Search.jsx and copy paste following code:
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
+
+class Search extends Component {
+  onSubmit(e) {
+    e.preventDefault();
+    
+    let username = this.refs.username.value.trim();
+    if (!username) {
+      alert('Please enter the username');
+      return
+    }
+    
+    this.props.onFormSubmit(username);
+    this.refs.username.value = '';
+  }
+  
+  render() {
+    return(
+      <div>
+        <form onSubmit={this.onSubmit.bind(this)}>
+          <label>Search Github Users</label>
+          <input type="text" ref="username" className="form-control" />
+        </form>
+      </div>
+    );
+  }
+}
+
+export default Search
+
+Include search in App.jsx as
+import Search from './github/Search.jsx';
+
+Also add following tag before Profile tag as:
+
+<Search onFormSubmit = {this.handleFormSubmit.bind(this)} />
+<Profile {...this.state} />
+
+Add following function in App.jsx below getUserRepos
+
+  handleFormSubmit(username) {
+    this.setState({username: username}, function() {
+      this.getUserData();
+      this.getUserRepos();
+    });
+  }
+  
+  
+Run the app
 
 
 
+Quiz:
+a. Which command creates a package.json file?
+npm create
+npm package
+npm new
+npm init (correct)
 
+b. By default, the webpack configuration file must be named what?
+config.js
+webpack.config.js (correct)
+webpack.conf.js
+webpack-config.js
+
+c. What loader did we use with Webpack?
+
+webpack-loader
+react-loader
+babel-loader (correct)
+jsx-loader
+
+d. With ES6 syntax, a component class must extend what class?
+
+React
+Component (correct)
+Master
+Application
+
+e. When using ES6, states are set in a constructor
+
+True (correct)
+False
