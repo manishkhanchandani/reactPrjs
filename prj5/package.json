@@ -1,7 +1,7 @@
 {
-  "name": "flux",
+  "name": "contactlist",
   "version": "1.0.0",
-  "description": "description",
+  "description": "Simple contact list app",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
